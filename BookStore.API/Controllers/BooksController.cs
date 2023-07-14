@@ -1,6 +1,6 @@
 ﻿using BookStore.API.Models;
 using BookStore.API.Repository;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.API.Controllers
@@ -21,6 +21,41 @@ namespace BookStore.API.Controllers
         {
             List<BookModel> books = await bookRepository.GetAllBooksAsync();
             return Ok(books);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBookById([FromRoute] int id)
+        {
+            BookModel book = await bookRepository.GetBookByIdAsync(id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+            return Ok(book);
+        }
+
+        [HttpPost("")]
+
+        public async Task<IActionResult> AddNewBook([FromBody] BookModel bookModel)
+        {
+            int bookId = await this.bookRepository.AddBookAsync(bookModel);
+
+            return CreatedAtAction(nameof(GetBookById), new { id = bookId, controller = "books"}, bookId);
+        }
+
+        [HttpPut("{bookId}")]
+
+        public async Task<IActionResult> UpdateBook([FromRoute] int bookId, [FromBody] BookModel bookModel)
+        {
+            await this.bookRepository.UpdateBookAsync(bookId, bookModel);
+            return Ok();
+        }
+
+        [HttpPatch("{bookId}")]
+        public async Task<IActionResult> UpdateBookPatch([FromRoute] int bookId, [FromBody] JsonPatchDocument bookModel)
+        {
+            await this.bookRepository.UpdateBookPatchAsync(bookId, bookModel);
+            return Ok();
         }
     }
 }

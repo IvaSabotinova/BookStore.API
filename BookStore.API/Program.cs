@@ -14,7 +14,7 @@ namespace BookStore.API
             builder.Services.AddDbContext<BookStoreContext>(options => 
                 options.UseSqlServer(builder.Configuration.GetConnectionString("BookStoreDB")));
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddNewtonsoftJson();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
