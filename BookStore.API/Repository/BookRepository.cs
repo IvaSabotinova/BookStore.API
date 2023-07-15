@@ -1,4 +1,6 @@
-﻿using BookStore.API.Data;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using BookStore.API.Data;
 using BookStore.API.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
@@ -8,32 +10,40 @@ namespace BookStore.API.Repository
     public class BookRepository : IBookRepository
     {
         private readonly BookStoreContext context;
+        private readonly IMapper mapper;
 
-        public BookRepository(BookStoreContext context)
+        public BookRepository(BookStoreContext context, IMapper mapper)
         {
             this.context = context;
+            this.mapper = mapper;
         }
 
         public async Task<List<BookModel>> GetAllBooksAsync()
         {
-            return await context.Books.Select(x => new BookModel
-            {
-                Id = x.Id,
-                Title = x.Title,
-                Description = x.Description,
-            })
-           .ToListAsync();
+            // return await context.Books.Select(x => new BookModel
+            // {
+            //     Id = x.Id,
+            //     Title = x.Title,
+            //     Description = x.Description,
+            // })
+            //.ToListAsync();
+
+            List<Book> books = await this.context.Books.ToListAsync();
+            return this.mapper.Map<List<BookModel>>(books);
         }
 
         public async Task<BookModel> GetBookByIdAsync(int bookId)
         {
-            return await context.Books.Where(x => x.Id == bookId).Select(x => new BookModel
-            {
-                Id = x.Id,
-                Title = x.Title,
-                Description = x.Description,
-            })
-             .FirstOrDefaultAsync();
+            //return await context.Books.Where(x => x.Id == bookId).Select(x => new BookModel
+            //{
+            //    Id = x.Id,
+            //    Title = x.Title,
+            //    Description = x.Description,
+            //})
+            // .FirstOrDefaultAsync();
+            Book book = await this.context.Books.FindAsync(bookId);
+            return this.mapper.Map<BookModel>(book); ;
+
         }
 
         public async Task<int> AddBookAsync(BookModel bookModel)
@@ -80,5 +90,21 @@ namespace BookStore.API.Repository
                 await this.context.SaveChangesAsync();
             }
         }
+
+        public async Task DeleteBookAsync(int bookId)
+        {
+            Book book = await context.Books.FindAsync(bookId);
+
+            if (book == null)
+            {
+                throw new Exception();
+            }
+            this.context.Books.Remove(book);
+            await this.context.SaveChangesAsync();
+            //Book book = new Book() { Id = bookId };
+            //this.context.Books.Remove(book);
+            //await this.context.SaveChangesAsync();
+        }
+
     }
 }
