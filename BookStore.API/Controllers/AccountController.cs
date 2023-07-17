@@ -1,6 +1,5 @@
 ﻿using BookStore.API.Models;
 using BookStore.API.Repository;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,6 +26,19 @@ namespace BookStore.API.Controllers
                 return Ok(result);
             }
             return Unauthorized();
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody]SignInModel signInModel)
+        {
+            string result = await this.accountRepository.LoginAsync(signInModel);
+
+            if (string.IsNullOrEmpty(result))
+            {
+                return Unauthorized();
+            }
+
+            return Ok(result);
         }
        
     }
